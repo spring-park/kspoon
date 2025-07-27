@@ -24,8 +24,66 @@
         }
 
         function SignupForm() {
-            const handleSubmit = () => {
-                alert("Thank you for signing up! We'll use your feedback to improve K-Spoon.");
+            const [formData, setFormData] = React.useState({
+                name: '',
+                email: '',
+                nationality: '',
+                stayDuration: '',
+                dietaryRestrictions: '',
+                diningFrequency: 'Daily',
+                challenges: '',
+                desiredFeatures: ''
+            });
+            const [submitStatus, setSubmitStatus] = React.useState('');
+
+            const handleChange = (e) => {
+                const { name, value } = e.target;
+                setFormData({ ...formData, [name]: value });
+            };
+
+            const handleSubmit = async () => {
+                if (!formData.name || !formData.email || !formData.nationality || !formData.stayDuration) {
+                    setSubmitStatus('Please fill in all required fields.');
+                    return;
+                }
+                try {
+                    const response = await fetch('YOUR_SUPABASE_URL/rest/v1/signups', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'apikey': 'YOUR_SUPABASE_ANON_KEY',
+                            'Authorization': 'Bearer YOUR_SUPABASE_ANON_KEY'
+                        },
+                        body: JSON.stringify({
+                            name: formData.name,
+                            email: formData.email,
+                            nationality: formData.nationality,
+                            stay_duration: formData.stayDuration,
+                            dietary_restrictions: formData.dietaryRestrictions || null,
+                            dining_frequency: formData.diningFrequency,
+                            challenges: formData.challenges || null,
+                            desired_features: formData.desiredFeatures || null
+                        })
+                    });
+                    if (response.ok) {
+                        setSubmitStatus('Thank you for signing up! Your feedback will help improve K-Spoon.');
+                        setFormData({
+                            name: '',
+                            email: '',
+                            nationality: '',
+                            stayDuration: '',
+                            dietaryRestrictions: '',
+                            diningFrequency: 'Daily',
+                            challenges: '',
+                            desiredFeatures: ''
+                        });
+                    } else {
+                        setSubmitStatus('Error submitting form. Please try again.');
+                    }
+                } catch (error) {
+                    setSubmitStatus('Error submitting form. Please try again.');
+                    console.error('Error:', error);
+                }
             };
 
             return (
@@ -36,24 +94,83 @@
                         <div className="bg-white p-8 rounded-lg shadow-lg">
                             <div className="space-y-6">
                                 <div>
-                                    <label className="block text-gray-700 font-semibold mb-2">Full Name</label>
-                                    <input type="text" placeholder="Enter your name" className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600" />
+                                    <label className="block text-gray-700 font-semibold mb-2">Full Name *</label>
+                                    <input
+                                        type="text"
+                                        name="name"
+                                        value={formData.name}
+                                        onChange={handleChange}
+                                        placeholder="Enter your name"
+                                        className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                                    />
                                 </div>
                                 <div>
-                                    <label className="block text-gray-700 font-semibold mb-2">Email Address</label>
-                                    <input type="email" placeholder="Enter your email" className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600" />
+                                    <label className="block text-gray-700 font-semibold mb-2">Email Address *</label>
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        value={formData.email}
+                                        onChange={handleChange}
+                                        placeholder="Enter your email"
+                                        className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                                    />
                                 </div>
                                 <div>
-                                    <label className="block text-gray-700 font-semibold mb-2">Nationality</label>
-                                    <input type="text" placeholder="Enter your nationality" className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600" />
+                                    <label className="block text-gray-700 font-semibold mb-2">Nationality *</label>
+                                    <input
+                                        type="text"
+                                        name="nationality"
+                                        value={formData.nationality}
+                                        onChange={handleChange}
+                                        placeholder="Enter your nationality"
+                                        className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-gray-700 font-semibold mb-2">How long are you staying in Korea? *</label>
+                                    <div className="flex space-x-4">
+                                        <label className="flex items-center">
+                                            <input
+                                                type="radio"
+                                                name="stayDuration"
+                                                value="short-term"
+                                                checked={formData.stayDuration === 'short-term'}
+                                                onChange={handleChange}
+                                                className="mr-2 focus:ring-blue-600"
+                                            />
+                                            Short-term traveler (less than 1 year)
+                                        </label>
+                                        <label className="flex items-center">
+                                            <input
+                                                type="radio"
+                                                name="stayDuration"
+                                                value="long-term"
+                                                checked={formData.stayDuration === 'long-term'}
+                                                onChange={handleChange}
+                                                className="mr-2 focus:ring-blue-600"
+                                            />
+                                            Long-term resident (more than 1 year)
+                                        </label>
+                                    </div>
                                 </div>
                                 <div>
                                     <label className="block text-gray-700 font-semibold mb-2">Dietary Restrictions (e.g., allergies, religious preferences)</label>
-                                    <textarea placeholder="List any allergies (e.g., peanuts, dairy) or dietary preferences (e.g., halal, vegan)" className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600 h-24"></textarea>
+                                    <textarea
+                                        name="dietaryRestrictions"
+                                        value={formData.dietaryRestrictions}
+                                        onChange={handleChange}
+                                        placeholder="List any allergies (e.g., peanuts, dairy) or dietary preferences (e.g., halal, vegan)"
+                                        className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600 h-24"
+                                    ></textarea>
                                 </div>
                                 <div>
                                     <label className="block text-gray-700 font-semibold mb-2">How often do you dine out in Korea?</label>
-                                    <select className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                                    <select
+                                        name="diningFrequency"
+                                        value={formData.diningFrequency}
+                                        onChange={handleChange}
+                                        className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                                    >
                                         <option>Daily</option>
                                         <option>Weekly</option>
                                         <option>Monthly</option>
@@ -62,13 +179,35 @@
                                 </div>
                                 <div>
                                     <label className="block text-gray-700 font-semibold mb-2">What challenges do you face when dining in Korea?</label>
-                                    <textarea placeholder="Describe any difficulties (e.g., language barriers, finding suitable menus)" className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600 h-24"></textarea>
+                                    <textarea
+                                        name="challenges"
+                                        value={formData.challenges}
+                                        onChange={handleChange}
+                                        placeholder="Describe any difficulties (e.g., language barriers, finding suitable menus)"
+                                        className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600 h-24"
+                                    ></textarea>
                                 </div>
                                 <div>
                                     <label className="block text-gray-700 font-semibold mb-2">What features would you like in a dining app?</label>
-                                    <textarea placeholder="E.g., multilingual menus, allergy filters, community reviews" className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600 h-24"></textarea>
+                                    <textarea
+                                        name="desiredFeatures"
+                                        value={formData.desiredFeatures}
+                                        onChange={handleChange}
+                                        placeholder="E.g., multilingual menus, allergy filters, community reviews"
+                                        className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600 h-24"
+                                    ></textarea>
                                 </div>
-                                <button onClick={handleSubmit} className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">Submit</button>
+                                <button
+                                    onClick={handleSubmit}
+                                    className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
+                                >
+                                    Submit
+                                </button>
+                                {submitStatus && (
+                                    <p className={`text-center mt-4 ${submitStatus.includes('Error') ? 'text-red-600' : 'text-green-600'}`}>
+                                        {submitStatus}
+                                    </p>
+                                )}
                             </div>
                         </div>
                     </div>
