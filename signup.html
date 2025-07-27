@@ -46,24 +46,26 @@
                     setSubmitStatus('Please fill in all required fields.');
                     return;
                 }
+                const payload = {
+                    name: formData.name,
+                    email: formData.email,
+                    nationality: formData.nationality,
+                    stay_duration: formData.stayDuration,
+                    dietary_restrictions: formData.dietaryRestrictions || null,
+                    dining_frequency: formData.diningFrequency,
+                    challenges: formData.challenges || null,
+                    desired_features: formData.desiredFeatures || null
+                };
+                console.log('Sending payload:', payload);
                 try {
-                    const response = await fetch('https://elpsqgesacyghsdldzqs.supabase.co', {
+                    const response = await fetch('https://elpsqgesacyghsdldzqs.supabase.co/rest/v1/signups', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                             'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVscHNxZ2VzYWN5Z2hzZGxkenFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2MjU2OTUsImV4cCI6MjA2OTIwMTY5NX0.iySRbqvuXsMrhjStEvyGtdd4U2ahjXd84RvPnwWnDOo',
-                            'Authorization': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVscHNxZ2VzYWN5Z2hzZGxkenFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2MjU2OTUsImV4cCI6MjA2OTIwMTY5NX0.iySRbqvuXsMrhjStEvyGtdd4U2ahjXd84RvPnwWnDOo'
+                            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVscHNxZ2VzYWN5Z2hzZGxkenFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2MjU2OTUsImV4cCI6MjA2OTIwMTY5NX0.iySRbqvuXsMrhjStEvyGtdd4U2ahjXd84RvPnwWnDOo'
                         },
-                        body: JSON.stringify({
-                            name: formData.name,
-                            email: formData.email,
-                            nationality: formData.nationality,
-                            stay_duration: formData.stayDuration,
-                            dietary_restrictions: formData.dietaryRestrictions || null,
-                            dining_frequency: formData.diningFrequency,
-                            challenges: formData.challenges || null,
-                            desired_features: formData.desiredFeatures || null
-                        })
+                        body: JSON.stringify(payload)
                     });
                     if (response.ok) {
                         setSubmitStatus('Thank you for signing up! Your feedback will help improve K-Spoon.');
@@ -78,11 +80,13 @@
                             desiredFeatures: ''
                         });
                     } else {
-                        setSubmitStatus('Error submitting form. Please try again.');
+                        const errorData = await response.json();
+                        setSubmitStatus(`Error submitting form: ${errorData.message || 'Unknown error'} (Status: ${response.status})`);
+                        console.error('Error details:', errorData);
                     }
                 } catch (error) {
-                    setSubmitStatus('Error submitting form. Please try again.');
-                    console.error('Error:', error);
+                    setSubmitStatus(`Error submitting form: ${error.message}`);
+                    console.error('Fetch error:', error);
                 }
             };
 
